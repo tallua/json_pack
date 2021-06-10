@@ -9,15 +9,23 @@ using namespace jpack::serialization;
 TEST(JPackTest, unpack_schema)
 {
   nlohmann::json json = {
-    { "foo", 3 }
+    { "foo", 3 },
+    { "bar", 4 },
+    { "baz", 5 }
   };
 
   JsonView view(json);
 
-  int val;
-  view >> Schema(
-    Must("foo", val)
+  int val1;
+  int val2;
+  int val3;
+  auto schema = Schema(
+    Must("foo", val1),
+    Must("bar", val2),
+    Must("baz", val3)
   );
 
-  EXPECT_EQ(3, val);
+  view >> schema;
+
+  EXPECT_EQ(3, val1);
 }

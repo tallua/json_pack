@@ -11,27 +11,22 @@ namespace detail {
 template <typename... _Args>
 struct JsonSchemas;
 
-template <typename _Arg0>
-struct JsonSchemas<_Arg0> {
-  JsonSchemas<_Arg0>(_Arg0&& arg0) : arg0(arg0) {}
+template <>
+struct JsonSchemas<> {
+    JsonSchemas(){}
 
   template <typename _JsonArchive>
-  void _unpack(_JsonArchive& archive) {
-    using namespace jpack::serialization;
-    archive >> arg0;
-  }
-
-  _Arg0 arg0;
+  void _unpack(_JsonArchive& archive) const {}
 };
 
 template <typename _Arg0, typename... _Args>
-struct JsonSchemas<_Arg0, _Args...> : public JsonSchemas<_Args...> {
-  JsonSchemas<_Arg0, _Args...>(_Arg0&& arg0, _Args&&... args)
+struct JsonSchemas<_Arg0, _Args...> : private JsonSchemas<_Args...> {
+    JsonSchemas<_Arg0, _Args...>(_Arg0&& arg0, _Args&&... args)
       : JsonSchemas<_Args...>(std::forward<_Args>(args)...),
         arg0(std::move(arg0)) {}
 
   template <typename _JsonArchive>
-  void _unpack(_JsonArchive& archive) {
+  void _unpack(const _JsonArchive& archive) const {
     using namespace jpack::serialization;
     archive >> arg0;
     JsonSchemas<_Args...>::_unpack(archive);
@@ -71,16 +66,16 @@ namespace jpack {
 namespace serialization {
 
 template <typename _JsonArchive, typename... _Args>
-_JsonArchive& operator>>(_JsonArchive& archive,
+const _JsonArchive& operator>>(const _JsonArchive& archive,
                          jpack::schema::detail::JsonSchemas<_Args...>& schema) {
   schema._unpack(archive);
   return archive;
 }
 
 template <typename _JsonArchive, typename _Access, typename _ArgType>
-_JsonArchive& operator>>(
-    _JsonArchive& archive,
-    jpack::schema::detail::JsonSchemaMust<_Access, _ArgType>& schema) {
+const _JsonArchive& operator>>(
+    const _JsonArchive& archive,
+    const jpack::schema::detail::JsonSchemaMust<_Access, _ArgType>& schema) {
   archive[schema.access] >> schema.arg;
   return archive;
 }

@@ -10,33 +10,24 @@ struct JsonView {
  public:
   JsonView(nlohmann::json& json) : json(json) {}
 
-  bool has(size_type index) { return json.is_array() && (index < json.size()); }
-  bool has(key_type key) {
+  bool has(size_type index) const { return json.is_array() && (index < json.size()); }
+  bool has(const key_type& key) const {
     return json.is_object() && (json.find(key) != json.end());
   }
 
-  JsonView operator[](size_type index) { return JsonView(json[index]); }
-  JsonView operator[](key_type key) { return JsonView(json[key]); }
+  JsonView operator[](size_type index) const { return JsonView(json[index]); }
+  JsonView operator[](const key_type& key) const { return JsonView(json[key]); }
 
-  template <typename _Tp>
-  _Tp as();
-
- private:
   nlohmann::json& json;
 };
-
-template <>
-int JsonView::as<int>() {
-  return json.get<int>();
-}
 
 }  // namespace jpack_test
 
 namespace jpack {
 namespace serialization {
 
-jpack_test::JsonView& operator>>(jpack_test::JsonView& archive, int& val) {
-  val = archive.as<int>();
+const jpack_test::JsonView& operator>>(const jpack_test::JsonView& archive, int& val) {
+  val = archive.json.get<int>();
   return archive;
 }
 
