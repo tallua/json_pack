@@ -4,8 +4,9 @@
 
 namespace jpack {
 
-// place holder for using jpack::serialization
-namespace serialization {}
+namespace serialization {
+class JpackSerializationException {};
+}  // namespace serialization
 
 namespace schema {
 namespace detail {
@@ -48,6 +49,18 @@ struct schema_must {
   _ArgType arg;
 };
 
+template <typename _Access, typename _ArgType>
+struct schema_should {
+  _Access access;
+  _ArgType arg;
+};
+
+template <typename _Access, typename _ArgType>
+struct schema_might {
+  _Access access;
+  _ArgType arg;
+};
+
 }  // namespace detail
 
 template <typename... _Args>
@@ -63,6 +76,16 @@ auto Ref(_Ref& ref) {
 template <typename _Access, typename _Target>
 auto Must(_Access key, _Target&& target) {
   return detail::schema_must<_Access, _Target>{key, std::move(target)};
+}
+
+template <typename _Access, typename _Target>
+auto Should(_Access key, _Target&& target) {
+  return detail::schema_should<_Access, _Target>{key, std::move(target)};
+}
+
+template <typename _Access, typename _Target>
+auto Might(_Access key, _Target&& target) {
+  return detail::schema_might<_Access, _Target>{key, std::move(target)};
 }
 
 }  // namespace schema
@@ -92,6 +115,27 @@ const _JsonArchive& operator>>(
     const _JsonArchive& archive,
     const jpack::schema::detail::schema_must<_Access, _Target>& schema) {
   archive[schema.access] >> schema.arg;
+  return archive;
+}
+
+template <typename _JsonArchive, typename _Access, typename _Target>
+const _JsonArchive& operator>>(
+    const _JsonArchive& archive,
+    const jpack::schema::detail::schema_should<_Access, _Target>& schema) {
+  if (!archive.has(schema.access)) {
+    throw JpackSerializationException();
+  }
+  archive[schema.access] >> schema.arg;
+  return archive;
+}
+
+template <typename _JsonArchive, typename _Access, typename _Target>
+const _JsonArchive& operator>>(
+    const _JsonArchive& archive,
+    const jpack::schema::detail::schema_might<_Access, _Target>& schema) {
+  if (archive.has(schema.access)) {
+    archive[schema.access] >> schema.arg;
+  }
   return archive;
 }
 
