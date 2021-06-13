@@ -64,7 +64,7 @@ struct schema_might {
 }  // namespace detail
 
 template <typename... _Args>
-auto Format(_Args&&... args) {
+auto Formats(_Args&&... args) {
   return detail::schema_list<_Args...>(std::forward<_Args>(args)...);
 }
 
@@ -97,7 +97,7 @@ namespace serialization {
 template <typename _JsonArchive, typename... _Args>
 const _JsonArchive& operator>>(
     const _JsonArchive& archive,
-    jpack::schema::detail::schema_list<_Args...>& schema) {
+    const jpack::schema::detail::schema_list<_Args...>& schema) {
   schema._unpack(archive);
   return archive;
 }

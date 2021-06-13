@@ -6,28 +6,32 @@ using namespace jpack_test;
 using namespace jpack::schema;
 using namespace jpack::serialization;
 
-TEST(JPackTest, unpack_schema)
+TEST(JPackTest, unpack_example)
 {
   nlohmann::json json = {
-    { "foo", 3 },
-    { "bar", 4 },
-    { "baz", 5 }
+    { "val1", 3 },
+    { "myobj", {
+      { "val2", 2 }
+    }}
   };
 
   JsonView view(json);
 
-  int val1;
-  int val2;
-  int val3;
-  auto schema = Format(
-    Must("foo", Ref(val1)),
-    Must("bar", Ref(val2)),
-    Must("baz", Ref(val3))
+  int value1;
+  int value2;
+  int value3 = 8;
+
+  auto schema = Formats(
+    Must("val1", Ref(value1)),
+    Must("myobj", Formats(
+      Should("val2", Ref(value2))
+    )),
+    Might("val3", Ref(value3))
   );
 
   view >> schema;
 
-  EXPECT_EQ(3, val1);
-  EXPECT_EQ(4, val2);
-  EXPECT_EQ(5, val3);
+  EXPECT_EQ(3, value1);
+  EXPECT_EQ(2, value2);
+  EXPECT_EQ(8, value3);
 }
