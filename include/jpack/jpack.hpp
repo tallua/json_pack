@@ -3,40 +3,47 @@
 #include <utility>
 
 namespace jpack {
+
+// place holder for using jpack::serialization
 namespace serialization {}
 
 namespace schema {
 namespace detail {
 
 template <typename... _Args>
-struct JsonSchemas;
+struct schema_list;
 
 template <>
-struct JsonSchemas<> {
-    JsonSchemas(){}
+struct schema_list<> {
+  schema_list() {}
 
   template <typename _JsonArchive>
   void _unpack(_JsonArchive& archive) const {}
 };
 
 template <typename _Arg0, typename... _Args>
-struct JsonSchemas<_Arg0, _Args...> : private JsonSchemas<_Args...> {
-    JsonSchemas<_Arg0, _Args...>(_Arg0&& arg0, _Args&&... args)
-      : JsonSchemas<_Args...>(std::forward<_Args>(args)...),
+struct schema_list<_Arg0, _Args...> : private schema_list<_Args...> {
+  schema_list<_Arg0, _Args...>(_Arg0&& arg0, _Args&&... args)
+      : schema_list<_Args...>(std::forward<_Args>(args)...),
         arg0(std::move(arg0)) {}
 
   template <typename _JsonArchive>
   void _unpack(const _JsonArchive& archive) const {
     using namespace jpack::serialization;
     archive >> arg0;
-    JsonSchemas<_Args...>::_unpack(archive);
+    schema_list<_Args...>::_unpack(archive);
   }
 
   _Arg0 arg0;
 };
 
+template <typename _Ref>
+struct schema_ref {
+  _Ref& ref;
+};
+
 template <typename _Access, typename _ArgType>
-struct JsonSchemaMust {
+struct schema_must {
   _Access access;
   _ArgType arg;
 };
@@ -44,20 +51,19 @@ struct JsonSchemaMust {
 }  // namespace detail
 
 template <typename... _Args>
-auto Schema(_Args&&... args) {
-  return detail::JsonSchemas<_Args...>(std::forward<_Args>(args)...);
+auto Format(_Args&&... args) {
+  return detail::schema_list<_Args...>(std::forward<_Args>(args)...);
 }
 
-template <typename _Access, typename _Ref>
-auto Must(_Access key, _Ref& ref) {
-  return detail::JsonSchemaMust<_Access, _Ref&>{key, ref};
+template <typename _Ref>
+auto Ref(_Ref& ref) {
+  return detail::schema_ref<_Ref>{ref};
 }
 
-template <typename _Access, typename _RVal>
-auto Must(_Access key, _RVal&& ref) {
-  return detail::JsonSchemaMust<_Access, _RVal>{key, std::move(ref)};
+template <typename _Access, typename _Target>
+auto Must(_Access key, _Target&& target) {
+  return detail::schema_must<_Access, _Target>{key, std::move(target)};
 }
-
 
 }  // namespace schema
 }  // namespace jpack
@@ -66,16 +72,25 @@ namespace jpack {
 namespace serialization {
 
 template <typename _JsonArchive, typename... _Args>
-const _JsonArchive& operator>>(const _JsonArchive& archive,
-                         jpack::schema::detail::JsonSchemas<_Args...>& schema) {
+const _JsonArchive& operator>>(
+    const _JsonArchive& archive,
+    jpack::schema::detail::schema_list<_Args...>& schema) {
   schema._unpack(archive);
   return archive;
 }
 
-template <typename _JsonArchive, typename _Access, typename _ArgType>
+template <typename _JsonArchive, typename _Ref>
 const _JsonArchive& operator>>(
     const _JsonArchive& archive,
-    const jpack::schema::detail::JsonSchemaMust<_Access, _ArgType>& schema) {
+    const jpack::schema::detail::schema_ref<_Ref>& schema) {
+  archive >> schema.ref;
+  return archive;
+}
+
+template <typename _JsonArchive, typename _Access, typename _Target>
+const _JsonArchive& operator>>(
+    const _JsonArchive& archive,
+    const jpack::schema::detail::schema_must<_Access, _Target>& schema) {
   archive[schema.access] >> schema.arg;
   return archive;
 }

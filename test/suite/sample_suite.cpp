@@ -19,13 +19,15 @@ TEST(JPackTest, unpack_schema)
   int val1;
   int val2;
   int val3;
-  auto schema = Schema(
-    Must("foo", val1),
-    Must("bar", val2),
-    Must("baz", val3)
+  auto schema = Format(
+    Must("foo", Ref(val1)),
+    Must("bar", Ref(val2)),
+    Must("baz", Ref(val3))
   );
 
   view >> schema;
 
   EXPECT_EQ(3, val1);
+  EXPECT_EQ(4, val2);
+  EXPECT_EQ(5, val3);
 }
