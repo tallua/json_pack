@@ -95,7 +95,7 @@ namespace jpack {
 namespace serialization {
 
 template <typename _JsonArchive, typename... _Args>
-const _JsonArchive& operator>>(
+static const _JsonArchive& operator>>(
     const _JsonArchive& archive,
     const jpack::schema::detail::schema_list<_Args...>& schema) {
   schema._unpack(archive);
@@ -103,7 +103,7 @@ const _JsonArchive& operator>>(
 }
 
 template <typename _JsonArchive, typename _Ref>
-const _JsonArchive& operator>>(
+static const _JsonArchive& operator>>(
     const _JsonArchive& archive,
     const jpack::schema::detail::schema_ref<_Ref>& schema) {
   archive >> schema.ref;
@@ -111,7 +111,7 @@ const _JsonArchive& operator>>(
 }
 
 template <typename _JsonArchive, typename _Access, typename _Target>
-const _JsonArchive& operator>>(
+static const _JsonArchive& operator>>(
     const _JsonArchive& archive,
     const jpack::schema::detail::schema_must<_Access, _Target>& schema) {
   archive[schema.access] >> schema.arg;
@@ -119,7 +119,7 @@ const _JsonArchive& operator>>(
 }
 
 template <typename _JsonArchive, typename _Access, typename _Target>
-const _JsonArchive& operator>>(
+static const _JsonArchive& operator>>(
     const _JsonArchive& archive,
     const jpack::schema::detail::schema_should<_Access, _Target>& schema) {
   if (!archive.has(schema.access)) {
@@ -130,7 +130,7 @@ const _JsonArchive& operator>>(
 }
 
 template <typename _JsonArchive, typename _Access, typename _Target>
-const _JsonArchive& operator>>(
+static const _JsonArchive& operator>>(
     const _JsonArchive& archive,
     const jpack::schema::detail::schema_might<_Access, _Target>& schema) {
   if (archive.has(schema.access)) {
