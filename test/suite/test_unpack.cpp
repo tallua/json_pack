@@ -92,9 +92,47 @@ TEST(JPackTest, unpack_array) {
   EXPECT_EQ("dummy", string_val);
 }
 
-TEST(JPackTest, unpack_nested_object) {}
+TEST(JPackTest, unpack_nested_object) {
+  auto json = nlohmann::json(
+      {{"foo", {{"bar", 2}, {"baz", true}}},
+       {"cocoa", {{"milk", "a cup"}, {"chocolate", "lots of"}}}});
 
-TEST(JPackTest, unpack_nested_array) {}
+  int foo_bar;
+  bool foo_baz;
+  std::string cooca_milk;
+  std::string cocoa_chocolate;
+
+  const auto format = Formats(
+      Must("foo",
+           Formats(Must("bar", Ref(foo_bar)), Must("baz", Ref(foo_baz)))),
+      Must("cocoa", Formats(Must("milk", Ref(cooca_milk)),
+                            Must("chocolate", Ref(cocoa_chocolate)))));
+
+  JsonView(json) >> format;
+
+  EXPECT_EQ(2, foo_bar);
+  EXPECT_EQ(true, foo_baz);
+  EXPECT_EQ("a cup", cooca_milk);
+  EXPECT_EQ("lots of", cocoa_chocolate);
+}
+
+TEST(JPackTest, unpack_nested_array) {
+  auto json = nlohmann::json::array(
+      {nlohmann::json::array({1, 2}), nlohmann::json::array({9, 14})});
+
+  int val_00, val_01, val_10, val_11;
+
+  const auto format =
+      Formats(Must(0, Formats(Must(0, Ref(val_00)), Must(1, Ref(val_01)))),
+              Must(1, Formats(Must(0, Ref(val_10)), Must(1, Ref(val_11)))));
+
+  JsonView(json) >> format;
+
+  EXPECT_EQ(1, val_00);
+  EXPECT_EQ(2, val_01);
+  EXPECT_EQ(9, val_10);
+  EXPECT_EQ(14, val_11);
+}
 
 TEST(JPackTest, unpack_copy_format) {
   auto json = nlohmann::json({{"foo", {{"bar", 2}}}});
