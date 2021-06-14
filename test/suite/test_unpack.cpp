@@ -15,7 +15,6 @@ TEST(JPackTest, unpack_array) {}
 TEST(JPackTest, unpack_nested_object) {}
 
 TEST(JPackTest, unpack_nested_array) {}
-TEST(JPackTest, unpack_object) {}
 
 TEST(JPackTest, unpack_copy_format) {
   auto json = nlohmann::json({{"foo", {{"bar", 2}}}});
