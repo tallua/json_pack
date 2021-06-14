@@ -5,7 +5,7 @@ project(jpack_test)
 file(GLOB_RECURSE SUITES RELATIVE ${CMAKE_SOURCE_DIR} "test/suite/*.cpp")
 add_executable(jpack_test test/main.cpp ${SUITES})
 
-set_property(TARGET jpack_test PROPERTY CXX_STANDARD 11)
+set_property(TARGET jpack_test PROPERTY CXX_STANDARD 14)
 set_property(TARGET jpack_test PROPERTY CXX_STANDARD_REQUIRED ON)
 
 # third party
