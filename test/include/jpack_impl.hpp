@@ -31,42 +31,42 @@ struct JsonView {
 namespace jpack {
 namespace serialization {
 
-const jpack_test::JsonView& operator>>(
+static const jpack_test::JsonView& operator>>(
     const jpack_test::JsonView& archive,
     int& val) {
   val = archive.json.get<int>();
   return archive;
 }
 
-const jpack_test::JsonView& operator>>(
+static const jpack_test::JsonView& operator>>(
     const jpack_test::JsonView& archive,
     bool& val) {
   val = archive.json.get<bool>();
   return archive;
 }
 
-const jpack_test::JsonView& operator>>(
+static const jpack_test::JsonView& operator>>(
     const jpack_test::JsonView& archive,
     int64_t& val) {
   val = archive.json.get<int64_t>();
   return archive;
 }
 
-const jpack_test::JsonView& operator>>(
+static const jpack_test::JsonView& operator>>(
     const jpack_test::JsonView& archive,
     uint64_t& val) {
   val = archive.json.get<uint64_t>();
   return archive;
 }
 
-const jpack_test::JsonView& operator>>(
+static const jpack_test::JsonView& operator>>(
     const jpack_test::JsonView& archive,
     double& val) {
   val = archive.json.get<double>();
   return archive;
 }
 
-const jpack_test::JsonView& operator>>(
+static const jpack_test::JsonView& operator>>(
     const jpack_test::JsonView& archive,
     std::string& val) {
   val = archive.json.get<std::string>();
