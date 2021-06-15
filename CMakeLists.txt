@@ -20,3 +20,8 @@ include_directories(test/include)
 target_link_libraries(jpack_test gtest)
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_target(run
+    COMMAND jpack_test
+    DEPENDS jpack_test 
+    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR})
